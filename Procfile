@@ -1,1 +1,1 @@
-web: gunicorn MatriculaOnlineApi:app
+web: gunicorn app:app
