@@ -31,6 +31,9 @@ class Aluno(db.Model):
   dataNascimento = db.Column(db.Unicode)
   email = db.Column(db.Unicode)
   senha = db.Column(db.Unicode)
+  pre_matricula = db.relationship('Disciplina', 
+    secondary=pre_matricula
+  )
 
   def as_dict(self):
     aluno = {
@@ -48,13 +51,8 @@ class Disciplina(db.Model):
   creditos = db.Column(db.Integer)
   pre_requisitos = db.relationship('Disciplina', 
     secondary=pre_requisitos,
-    backref=db.backref('disciplinas', lazy='dynamic'), 
-    primaryjoin='Disciplina.codigo==pre_requisito.codigo_disciplina',
-    secondaryjoin='Disciplina.codigo==pre_requisito.codigo_pre_requisito'
-  )
-  alunos = db.relationship('Aluno', 
-    secondary=pre_matricula,
-    backref=db.backref('pre_matricula', lazy='dynamic')
+    primaryjoin='Disciplina.codigo==pre_requisito.c.codigo_disciplina',
+    secondaryjoin='Disciplina.codigo==pre_requisito.c.codigo_pre_requisito'
   )
 
   def as_dict(self):
@@ -102,6 +100,7 @@ def pre_matricula():
 
 manager = flask_restless.APIManager(app, flask_sqlalchemy_db=db)
 manager.create_api(Aluno, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=["senha"])
+manager.create_api(Disciplina, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 port = int(os.environ.get('PORT', 5000))
 
