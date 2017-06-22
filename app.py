@@ -83,6 +83,23 @@ def login():
   )
   return response
 
+@app.route('/api/pre-matricula', methods=['POST'])
+def pre_matricula():
+  data = request.get_json()
+  aluno = Aluno.get(data["matricula"])
+  if aluno:
+    for codigo in data["disciplinas"]:
+      disciplina = Disciplina.get(codigo)
+      aluno.pre_matricula.append(disciplina)
+    return jsonify({"message": "Success!"})
+  else:
+    response = app.response_class(
+      response=json.dumps({"message": "Something went wrong!"}),
+      status=403,
+      mimetype='application/json'
+    )
+    return response
+
 manager = flask_restless.APIManager(app, flask_sqlalchemy_db=db)
 manager.create_api(Aluno, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=["senha"])
 
