@@ -14,6 +14,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] =  os.environ['DATABASE_URL']
 
 db = flask_sqlalchemy.SQLAlchemy(app)
 
+pre_matricula = db.Table('pre_matricula',
+  db.Column('matricula_aluno', db.Integer, db.ForeignKey('aluno.matricula')),
+  db.Column('codigo_disciplina', db.Unicode, db.ForeignKey('disciplina.codigo'))
+)
+
+pre_requisitos = db.Table('pre_requisito',
+  db.Column('codigo_disciplina', db.Unicode, db.ForeignKey('disciplina.codigo')),
+  db.Column('codigo_pre_requisito', db.Unicode, db.ForeignKey('disciplina.codigo'))
+)
+
 class Aluno(db.Model):
   matricula = db.Column(db.Integer, primary_key=True)
   nome = db.Column(db.Unicode)
@@ -32,11 +42,6 @@ class Aluno(db.Model):
     }
     return aluno
 
-pre_requisitos = db.Table('pre_requisito',
-  db.Column('codigo_disciplina', db.Unicode, db.ForeignKey('disciplina.codigo')),
-  db.Column('codigo_pre_requisito', db.Unicode, db.ForeignKey('disciplina.codigo'))
-)
-
 class Disciplina(db.Model):
   codigo = db.Column(db.Unicode, primary_key=True)
   nome = db.Column(db.Unicode)
@@ -46,6 +51,10 @@ class Disciplina(db.Model):
     backref=db.backref('disciplinas', lazy='dynamic'), 
     primaryjoin='Disciplina.codigo==pre_requisito.codigo_disciplina',
     secondaryjoin='Disciplina.codigo==pre_requisito.codigo_pre_requisito'
+  )
+  alunos = db.relationship('Aluno', 
+    secondary=pre_matricula,
+    backref=db.backref('pre_matricula', lazy='dynamic')
   )
 
   def as_dict(self):
