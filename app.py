@@ -105,7 +105,7 @@ def login():
   )
   return response
 
-@app.route('/api/disciplinas-disponiveis', methods=['GET'])
+@app.route('/api/disciplinas-disponiveis', methods=['POST'])
 def disciplinas_disponiveis():
   data = request.get_json()
   aluno = Aluno.query.get(data["matricula"])
@@ -124,7 +124,7 @@ def disciplinas_disponiveis():
   )
   return response
 
-@app.route('/api/disciplinas-disponiveis-para-quebra-de-requisito', methods=['GET'])
+@app.route('/api/disciplinas-disponiveis-para-quebra-de-requisito', methods=['POST'])
 def disciplinas_disponiveis_para_quebra_de_requisito():
   data = request.get_json()
   aluno = Aluno.query.get(data["matricula"])
