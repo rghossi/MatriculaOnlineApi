@@ -57,9 +57,9 @@ class Disciplina(db.Model):
 
   def as_dict(self):
     disciplina = {
-      'codigo': self.matricula,
+      'codigo': self.codigo,
       'nome': self.nome,
-      'creditos': self.sobrenome,
+      'creditos': self.creditos,
       'pre_requisitos': self.pre_requisitos
     }
     return disciplina
@@ -81,13 +81,32 @@ def login():
   )
   return response
 
+@app.route('/api/disciplinas-disponiveis', methods=['GET'])
+def disciplinas_disponiveis():
+  data = request.get_json()
+  aluno = Aluno.query.get(data["matricula"])
+  if aluno:
+    disciplinas = Disciplina.query.all()
+    disciplinas_disponiveis = []
+    for disciplina in disciplinas:
+      if not disciplina.pre_requisitos:
+        disciplinas_disponiveis.append(disciplina.as_dict())
+    return jsonify({"disciplinas": disciplinas_disponiveis})
+  
+  response = app.response_class(
+    response=json.dumps({"message": "Wrong login/password pair!"}),
+    status=403,
+    mimetype='application/json'
+  )
+  return response
+
 @app.route('/api/pre-matricula', methods=['POST'])
 def pre_matricula():
   data = request.get_json()
-  aluno = Aluno.get(data["matricula"])
+  aluno = Aluno.query.get(data["matricula"])
   if aluno:
     for codigo in data["disciplinas"]:
-      disciplina = Disciplina.get(codigo)
+      disciplina = Disciplina.query.get(codigo)
       aluno.pre_matricula.append(disciplina)
     return jsonify({"message": "Success!"})
   else:
