@@ -23,48 +23,39 @@ class Aluno(db.Model):
   senha = db.Column(db.Unicode)
 
   def as_dict(self):
-      aluno = {
-          'matricula': self.matricula,
-          'nome': self.nome,
-          'sobrenome': self.sobrenome,
-          'dataNascimento': self.dataNascimento,
-          'email': self.email
-      }
-      return aluno
+    aluno = {
+      'matricula': self.matricula,
+      'nome': self.nome,
+      'sobrenome': self.sobrenome,
+      'dataNascimento': self.dataNascimento,
+      'email': self.email
+    }
+    return aluno
 
-class Disciplina(db.Model):
-    codigo = db.Column(db.Unicode, primary_key=True)
-    nome = db.Column(db.Unicode)
-    creditos = db.Column(db.Integer)
-    pre_requisitos = db.relationship('Discilplina', secondary=pre_requisitos,
-        backref=db.backref('disciplinas', lazy='dynamic'))
-
-  def as_dict(self):
-      disciplina = {
-          'codigo': self.matricula,
-          'nome': self.nome,
-          'creditos': self.sobrenome,
-          'pre_requisitos': self.pre_requisitos
-      }
-      return disciplina
-
-pre_requisitos = db.Table('PreRequisito',
-    db.Column('codigo_disciplina', db.Integer, db.ForeignKey('Disciplina.codigo')),
-    db.Column('codigo_pre_requisito', db.Integer, db.ForeignKey('Disciplina.codigo'))
+pre_requisitos = db.Table('pre_requisito',
+  db.Column('codigo_disciplina', db.Unicode, db.ForeignKey('disciplina.codigo')),
+  db.Column('codigo_pre_requisito', db.Unicode, db.ForeignKey('disciplina.codigo'))
 )
 
-class PreRequisito(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
+class Disciplina(db.Model):
+  codigo = db.Column(db.Unicode, primary_key=True)
   nome = db.Column(db.Unicode)
   creditos = db.Column(db.Integer)
+  pre_requisitos = db.relationship('Disciplina', 
+    secondary=pre_requisitos,
+    backref=db.backref('disciplinas', lazy='dynamic'), 
+    primaryjoin='Disciplina.codigo==pre_requisito.codigo_disciplina',
+    secondaryjoin='Disciplina.codigo==pre_requisito.codigo_pre_requisito'
+  )
 
   def as_dict(self):
-      disciplina = {
-          'codigo': self.matricula,
-          'nome': self.nome,
-          'creditos': self.sobrenome
-      }
-      return disciplina
+    disciplina = {
+      'codigo': self.matricula,
+      'nome': self.nome,
+      'creditos': self.sobrenome,
+      'pre_requisitos': self.pre_requisitos
+    }
+    return disciplina
 
 db.create_all()
 
@@ -74,12 +65,12 @@ def login():
   matches = Aluno.query.filter_by(matricula=data["matricula"],
                                  senha=data["senha"]).all()
   if len(matches) > 0:
-      return jsonify({"aluno": matches[0].as_dict()})
+    return jsonify({"aluno": matches[0].as_dict()})
 
   response = app.response_class(
-      response=json.dumps({"message": "Wrong login/password pair!"}),
-      status=403,
-      mimetype='application/json'
+    response=json.dumps({"message": "Wrong login/password pair!"}),
+    status=403,
+    mimetype='application/json'
   )
   return response
 
