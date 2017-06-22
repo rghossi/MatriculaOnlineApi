@@ -36,12 +36,16 @@ class Aluno(db.Model):
   )
 
   def as_dict(self):
+    pre_matricula = []
+    for p in self.pre_matricula:
+      pre_matricula.append(p.as_dict())
     aluno = {
       'matricula': self.matricula,
       'nome': self.nome,
       'sobrenome': self.sobrenome,
       'dataNascimento': self.dataNascimento,
-      'email': self.email
+      'email': self.email,
+      'pre_matricula': pre_matricula
     }
     return aluno
 
@@ -56,11 +60,14 @@ class Disciplina(db.Model):
   )
 
   def as_dict(self):
+    pre_requisitos = []
+    for p in self.pre_requisitos:
+      pre_requisitos.append(p.as_dict())
     disciplina = {
       'codigo': self.codigo,
       'nome': self.nome,
       'creditos': self.creditos,
-      'pre_requisitos': self.pre_requisitos
+      'pre_requisitos': pre_requisitos
     }
     return disciplina
 
@@ -90,6 +97,25 @@ def disciplinas_disponiveis():
     disciplinas_disponiveis = []
     for disciplina in disciplinas:
       if not disciplina.pre_requisitos:
+        disciplinas_disponiveis.append(disciplina.as_dict())
+    return jsonify({"disciplinas": disciplinas_disponiveis})
+  
+  response = app.response_class(
+    response=json.dumps({"message": "Wrong login/password pair!"}),
+    status=403,
+    mimetype='application/json'
+  )
+  return response
+
+@app.route('/api/disciplinas-disponiveis-para-quebra-de-requisito', methods=['GET'])
+def disciplinas_disponiveis_para_quebra_de_requisito():
+  data = request.get_json()
+  aluno = Aluno.query.get("113111306")
+  if aluno:
+    disciplinas = Disciplina.query.all()
+    disciplinas_disponiveis = []
+    for disciplina in disciplinas:
+      if disciplina.pre_requisitos:
         disciplinas_disponiveis.append(disciplina.as_dict())
     return jsonify({"disciplinas": disciplinas_disponiveis})
   
