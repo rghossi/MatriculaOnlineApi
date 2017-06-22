@@ -34,6 +34,7 @@ class Aluno(db.Model):
   pre_matricula = db.relationship('Disciplina', 
     secondary=pre_matricula
   )
+  quebras = db.relationship('Quebra', backref='aluno', lazy='dynamic')
 
   def as_dict(self):
     pre_matricula = []
@@ -58,6 +59,7 @@ class Disciplina(db.Model):
     primaryjoin='Disciplina.codigo==pre_requisito.c.codigo_disciplina',
     secondaryjoin='Disciplina.codigo==pre_requisito.c.codigo_pre_requisito'
   )
+  quebras = db.relationship('Quebra', backref='disciplina', lazy='dynamic')
 
   def as_dict(self):
     pre_requisitos = []
@@ -70,6 +72,21 @@ class Disciplina(db.Model):
       'pre_requisitos': pre_requisitos
     }
     return disciplina
+
+class Quebra(db.Model):
+  aluno_matricula = db.Column(db.Integer, db.ForeignKey('aluno.matricula'), primary_key=True)
+  disciplina_codigo = db.Column(db.Unicode, db.ForeignKey('disciplina.codigo'), primary_key=True)
+  message = db.Column(db.Unicode)
+  status = db.Column(db.Unicode, default=u'Pending')
+
+  def as_dict(self):
+    quebra = {
+      'aluno_matricula': self.aluno_matricula,
+      'disciplina_codigo': self.disciplina_codigo,
+      'message': self.message,
+      'status': self.status
+    }
+    return quebra
 
 db.create_all()
 
@@ -110,7 +127,7 @@ def disciplinas_disponiveis():
 @app.route('/api/disciplinas-disponiveis-para-quebra-de-requisito', methods=['GET'])
 def disciplinas_disponiveis_para_quebra_de_requisito():
   data = request.get_json()
-  aluno = Aluno.query.get("113111306")
+  aluno = Aluno.query.get(data["matricula"])
   if aluno:
     disciplinas = Disciplina.query.all()
     disciplinas_disponiveis = []
@@ -146,6 +163,7 @@ def pre_matricula():
 manager = flask_restless.APIManager(app, flask_sqlalchemy_db=db)
 manager.create_api(Aluno, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=["senha"])
 manager.create_api(Disciplina, methods=['GET', 'POST', 'PUT', 'DELETE'])
+manager.create_api(Quebra, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 port = int(os.environ.get('PORT', 5000))
 
