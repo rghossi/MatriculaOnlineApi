@@ -50,6 +50,22 @@ class Aluno(db.Model):
     }
     return aluno
 
+class Professor(db.Model):
+  matricula = db.Column(db.Integer, primary_key=True)
+  nome = db.Column(db.Unicode)
+  sobrenome = db.Column(db.Unicode)
+  email = db.Column(db.Unicode)
+  senha = db.Column(db.Unicode)
+
+  def as_dict(self):
+    professor = {
+      'matricula': self.matricula,
+      'nome': self.nome,
+      'sobrenome': self.sobrenome,
+      'email': self.email
+    }
+    return professor
+
 class Disciplina(db.Model):
   codigo = db.Column(db.Unicode, primary_key=True)
   nome = db.Column(db.Unicode)
@@ -162,6 +178,7 @@ def pre_matricula():
 
 manager = flask_restless.APIManager(app, flask_sqlalchemy_db=db)
 manager.create_api(Aluno, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=["senha"])
+manager.create_api(Professor, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=["senha"])
 manager.create_api(Disciplina, methods=['GET', 'POST', 'PUT', 'DELETE'])
 manager.create_api(Quebra, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
