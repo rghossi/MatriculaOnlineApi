@@ -180,7 +180,7 @@ manager = flask_restless.APIManager(app, flask_sqlalchemy_db=db)
 manager.create_api(Aluno, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=["senha"])
 manager.create_api(Professor, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=["senha"])
 manager.create_api(Disciplina, methods=['GET', 'POST', 'PUT', 'DELETE'])
-manager.create_api(Quebra, methods=['GET', 'POST', 'PUT', 'DELETE'])
+manager.create_api(Quebra, methods=['GET', 'POST', 'PUT', 'DELETE'], allow_patch_many=True)
 
 port = int(os.environ.get('PORT', 5000))
 
