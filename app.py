@@ -10,7 +10,11 @@ app = flask.Flask(__name__)
 CORS(app)
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] =  os.environ['DATABASE_URL']
+
+if 'DATABASE_URL' in os.environ:
+  app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+else:
+  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/matricula_teste'
 
 db = flask_sqlalchemy.SQLAlchemy(app)
 
