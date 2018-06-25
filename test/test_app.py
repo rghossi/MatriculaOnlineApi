@@ -44,3 +44,23 @@ def test_aluno_crud(client):
     assert json_data['sobrenome'] == 'Carvalho'
     assert json_data['email'] == 'dioginis@manguaceiro.com'
     assert json_data['pre_matricula'] == []
+
+def test_pre_matricula(client):
+    # CRIA ALUNO
+    rv = client.post('/api/aluno', json={
+      'matricula': 123456789, 'nome': 'Dioginis', 'sobrenome': 'Carvalho'
+    })
+
+    # CRIA DISCIPLINA
+    rv = client.post('/api/disciplina', json={
+      'codigo': '1234', 'nome': 'Teste de Software', 'creditos': 3,
+    })
+
+    # ADICIONA DISCIPLINA NA PRE MATRICULA
+    rv = client.post('/api/pre-matricula', json={
+      'matricula': 123456789, 'disciplinas': ['1234']
+    })
+    json_data = rv.get_json()
+
+    print json_data
+    assert json_data['message'] == "Success!"
